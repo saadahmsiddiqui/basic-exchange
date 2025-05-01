@@ -43,9 +43,5 @@ fn main() {
         }
     );
 
-    let size = ob.orderbook_size();
-    println!("Orderbook asks: {} Orderbook bids: {}", size.asks, size.bids);
-    // println!();
-
-    // ob.print_orderbook();
+    ob.save_json();
 }

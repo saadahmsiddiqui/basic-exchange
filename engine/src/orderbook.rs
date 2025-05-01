@@ -1,10 +1,16 @@
+use crate::amount::Amount;
 use crate::order::Order;
 use crate::price::Price;
-use crate::amount::Amount;
 use crate::side::Side;
 use priority_queue::PriorityQueue;
+use serde::Serialize;
+use serde::ser::SerializeStruct;
 use std::cmp::Reverse;
 use std::collections::BTreeMap;
+use std::fs::File;
+
+use chrono::Local;
+use std::io::Write;
 
 pub struct OrderbookSize {
     pub asks: usize,
@@ -15,7 +21,7 @@ pub struct Orderbook {
     asks: BTreeMap<Price, PriorityQueue<Box<Order>, u64>>,
     bids: BTreeMap<Price, PriorityQueue<Box<Order>, u64>>,
     asks_cache: BTreeMap<Reverse<Price>, Amount>,
-    bids_cache: BTreeMap<Reverse<Price>, Amount>
+    bids_cache: BTreeMap<Reverse<Price>, Amount>,
 }
 
 impl<'a> Orderbook {
@@ -24,20 +30,20 @@ impl<'a> Orderbook {
             asks: BTreeMap::new(),
             bids: BTreeMap::new(),
             asks_cache: BTreeMap::new(),
-            bids_cache: BTreeMap::new()
+            bids_cache: BTreeMap::new(),
         }
     }
 
     fn update_cache(&mut self, price: Price, amount: Amount, is_bid: bool) {
         let map = match is_bid {
             true => &mut self.bids_cache,
-            false => &mut self.asks_cache
+            false => &mut self.asks_cache,
         };
 
         let reversed = Reverse(price.clone());
         let amount = match map.get(&reversed) {
             Some(_amount) => *_amount + amount,
-            _ => amount
+            _ => amount,
         };
 
         map.insert(Reverse(price), amount);
@@ -88,7 +94,7 @@ impl<'a> Orderbook {
 
         let to_return = match first_val {
             None => None,
-            Some((price, amount)) => Some((price.clone(), amount.clone()))
+            Some((price, amount)) => Some((price.clone(), amount.clone())),
         };
 
         to_return
@@ -96,12 +102,12 @@ impl<'a> Orderbook {
 
     pub fn peek_bid(&self) -> Option<(Reverse<Price>, Amount)> {
         let first_val = self.bids_cache.first_key_value();
-        
+
         let to_return = match first_val {
             None => None,
-            Some((price, amount)) => Some((price.clone(), amount.clone()))
+            Some((price, amount)) => Some((price.clone(), amount.clone())),
         };
-        
+
         to_return
     }
 
@@ -112,20 +118,49 @@ impl<'a> Orderbook {
         OrderbookSize { asks, bids }
     }
 
-    pub fn print_orderbook(&self) {
-        let asks = &self.asks_cache;
-        let bids = &self.bids_cache;
+    // pub fn print_orderbook(&self) {
+    //     let asks = &self.asks_cache;
+    //     let bids = &self.bids_cache;
 
-        asks.iter().for_each(|ask| {
-            let price = &ask.0.0;
-            print!("SELL {} {}\n", price, ask.1)
-        });
+    //     asks.iter().for_each(|ask| {
+    //         let price = &ask.0.0;
+    //         print!("SELL {} {}\n", price, ask.1)
+    //     });
 
-        println!();
+    //     println!();
 
-        bids.iter().for_each(|bid| {
-            let price = &bid.0.0;
-            print!("BUY {} {}\n", price, bid.1)
-        });
+    //     bids.iter().for_each(|bid| {
+    //         let price = &bid.0.0;
+    //         print!("BUY {} {}\n", price, bid.1)
+    //     });
+    // }
+
+    pub fn save_json(&self) {
+        let json = serde_json::to_string(&self).unwrap();
+        let timestamp = Local::now().format("%Y%m%d_%H%M%S").to_string();
+        let filename = format!("orderbook_{}.json", timestamp);
+        let mut file = File::create(&filename).unwrap();
+        writeln!(file, "{}", json).unwrap();
+    }
+}
+
+impl Serialize for Orderbook {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let list_mapper = |val: (&Reverse<Price>, &Amount)| {
+            let price_serialized = val.0.0;
+            let amount_serialized = val.1;
+
+            (price_serialized.clone(), amount_serialized.clone())
+        };
+
+        let ask_list: Vec<(Price, Amount)> = self.asks_cache.iter().map(list_mapper).collect();
+        let bid_list: Vec<(Price, Amount)> = self.bids_cache.iter().map(list_mapper).collect();
+        let mut state = serializer.serialize_struct("Result", 2).unwrap();
+        state.serialize_field("asks", &ask_list).unwrap();
+        state.serialize_field("bids", &bid_list).unwrap();
+        state.end()
     }
 }
