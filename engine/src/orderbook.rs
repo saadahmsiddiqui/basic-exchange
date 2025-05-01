@@ -32,11 +32,9 @@ impl<'a> Orderbook {
 
                 match presence {
                     Some(quotes) => {
-                        println!("Again Buy for price: {}", order.limit_price.clone());
                         quotes.push(Box::new(order), order_id);
                     }
                     None => {
-                        println!("Buy for price: {}", order.limit_price.clone());
                         let mut pr_queue = PriorityQueue::new();
                         pr_queue.push(Box::new(order), order_id);
                         self.bids.insert(quote, pr_queue);
@@ -48,11 +46,9 @@ impl<'a> Orderbook {
 
                 match presence {
                     Some(quotes) => {
-                        println!("Again Sell for price: {}", order.limit_price.clone());
                         quotes.push(Box::new(order), order_id);
                     }
                     None => {
-                        println!("Sell for price: {}", order.limit_price.clone());
                         let mut pr_queue = PriorityQueue::new();
                         pr_queue.push(Box::new(order), order_id);
                         self.asks.insert(quote, pr_queue);
