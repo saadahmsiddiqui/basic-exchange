@@ -1,5 +1,7 @@
 use std::{fs::File, path::Path};
 
+use operation_type::OperationType;
+
 mod price;
 mod operation_type;
 mod side;
@@ -21,7 +23,13 @@ fn main() {
             let ask = ob.peek_ask();
             let bid = ob.peek_bid();
 
-            println!("{} {} {}", &x.side, &x.amount, &x.limit_price);
+            if x.type_op == OperationType::DELETE {
+                ob.remove_order(x);
+            } else {
+                ob.new_order(x.clone());
+            }
+
+            println!("{} {} {} {}", &x.type_op, &x.side, &x.amount, &x.limit_price);
 
             match ask {
                 None => {},
@@ -37,9 +45,8 @@ fn main() {
                 }
             }
 
+            ob.print_len();
             println!();
-
-            ob.new_order(x.clone());
         }
     );
 

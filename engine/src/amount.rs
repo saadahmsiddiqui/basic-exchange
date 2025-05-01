@@ -7,7 +7,7 @@ use serde::Serialize;
 use crate::constants::PRECISION;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
-pub struct Amount(u64);
+pub struct Amount(pub u64);
 
 impl<'de> Deserialize<'de> for Amount {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -38,7 +38,6 @@ impl<'de> Deserialize<'de> for Amount {
 
     }
 }
-
 
 impl Serialize for Amount {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
