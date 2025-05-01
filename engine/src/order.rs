@@ -1,6 +1,7 @@
 use std::fmt::{self, Display};
 use serde::de::{Deserialize, Visitor};
 use serde::{Serialize, Deserialize as Des};
+use serde_with::{serde_as, DisplayFromStr};
 
 type OrderId = u64;
 type AccountId = u64;
@@ -70,14 +71,16 @@ impl<'de> Deserialize<'de> for Side {
 }
 
 pub enum OperationType {
-    CREATE
+    CREATE,
+    DELETE
 }
 
 
 impl Display for OperationType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let message = match self {
-            OperationType::CREATE => "CREATE"
+            OperationType::CREATE => "CREATE",
+            OperationType::DELETE => "DELETE"
         };
 
         write!(f, "{}", message)
@@ -103,6 +106,7 @@ impl<'de> Deserialize<'de> for OperationType {
                 
                 let value = match v {
                     "CREATE" => Ok(OperationType::CREATE),
+                    "DELETE" => Ok(OperationType::DELETE),
                     _ => Err(E::custom("unknown value, unable to deserialize"))
                 };
 
@@ -120,20 +124,26 @@ impl Serialize for OperationType {
             S: serde::Serializer {
 
         let message = match self {
-            OperationType::CREATE => "CREATE"
+            OperationType::CREATE => "CREATE",
+            OperationType::DELETE => "DELETE"
         };
 
         serializer.serialize_str(message)
     }
 }
 
+#[serde_as]
 #[derive(Serialize, Des)]
 pub struct Order {
     pub type_op: OperationType,
+    #[serde_as(as = "DisplayFromStr")]
     pub account_id: AccountId,
+    #[serde_as(as = "DisplayFromStr")]
     pub amount: Amount,
     pub pair: Pair,
+    #[serde_as(as = "DisplayFromStr")]
     pub order_id: OrderId,
+    #[serde_as(as = "DisplayFromStr")]
     pub limit_price: Price,
     pub side: Side
 }
