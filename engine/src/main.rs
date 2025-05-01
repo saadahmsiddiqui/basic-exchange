@@ -6,6 +6,7 @@ mod operation_type;
 mod side;
 mod order;
 mod orderbook;
+mod amount;
 
 fn main() {
     let json_file_path = Path::new("./orders.json");

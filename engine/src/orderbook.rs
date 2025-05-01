@@ -9,8 +9,8 @@ pub struct OrderbookSize {
 }
 
 pub struct Orderbook {
-    asks: BTreeMap<Price, Vec<Order>>,
-    bids: BTreeMap<Price, Vec<Order>>
+    asks: BTreeMap<Price, Vec<Box<Order>>>,
+    bids: BTreeMap<Price, Vec<Box<Order>>>
 }
 
 
@@ -31,11 +31,11 @@ impl<'a> Orderbook {
 
                 match presence {
                     Some(quotes) => {
-                        quotes.push(order);
+                        quotes.push(Box::new(order));
                     },
                     None => {
                         let mut new_vec = Vec::new();
-                        new_vec.push(order);
+                        new_vec.push(Box::new(order));
                         self.bids.insert(quote, new_vec);
                     }
                 }
@@ -45,11 +45,11 @@ impl<'a> Orderbook {
 
                 match presence {
                     Some(quotes) => {
-                        quotes.push(order);
+                        quotes.push(Box::new(order));
                     },
                     None => {
                         let mut new_vec = Vec::new();
-                        new_vec.push(order);
+                        new_vec.push(Box::new(order));
                         self.asks.insert(quote, new_vec);
                     }
                 }
