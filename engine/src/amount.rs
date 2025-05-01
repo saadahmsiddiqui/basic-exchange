@@ -1,4 +1,5 @@
 use std::fmt::{self, Display};
+use std::ops::{Add, Sub};
 
 use serde::de::{Visitor, Deserialize};
 use serde::Serialize;
@@ -52,5 +53,22 @@ impl Display for Amount {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let in_str = self.0.to_string();
         f.write_str(&in_str)
+    }
+}
+
+impl Add for Amount {
+    type Output = Amount;
+    fn add(self, rhs: Self) -> Self::Output {
+        let amount = self.0 + rhs.0;
+        Self(amount)
+    }
+}
+
+impl Sub for Amount {
+    type Output = Amount;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        let amount = self.0 - rhs.0;
+        Self(amount)
     }
 }

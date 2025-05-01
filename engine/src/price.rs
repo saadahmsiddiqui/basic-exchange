@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 
 use serde::de::{Visitor, Deserialize};
 use serde::Serialize;
-
+use crate::constants::PRECISION;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
 pub struct Price(u64);
@@ -25,7 +25,7 @@ impl<'de> Deserialize<'de> for Price {
                     E: serde::de::Error, {
                 
                 let val = v.parse::<f64>().unwrap();
-                let upscaled = (val * 1000000 as f64) as u64;
+                let upscaled = (val * PRECISION as f64) as u64;
 
                 Ok(Price(upscaled))
             }
@@ -43,7 +43,7 @@ impl Serialize for Price {
         where
             S: serde::Serializer {
         let val = self.0;
-        let original_price = (val as f64) / (1000000 as f64);
+        let original_price = (val as f64) / (PRECISION as f64);
         let in_str = original_price.to_string();
         serializer.serialize_str(&in_str)
     }

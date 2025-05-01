@@ -1,0 +1,1 @@
+pub const PRECISION: u64 = 1000000;
