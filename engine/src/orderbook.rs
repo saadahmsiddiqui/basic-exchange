@@ -1,18 +1,18 @@
-use std::collections::BTreeMap;
 use crate::order::Order;
 use crate::price::Price;
 use crate::side::Side;
+use priority_queue::PriorityQueue;
+use std::collections::BTreeMap;
 
 pub struct OrderbookSize {
     pub asks: usize,
-    pub bids: usize
+    pub bids: usize,
 }
 
 pub struct Orderbook {
-    asks: BTreeMap<Price, Vec<Box<Order>>>,
-    bids: BTreeMap<Price, Vec<Box<Order>>>
+    asks: BTreeMap<Price, PriorityQueue<Box<Order>, u64>>,
+    bids: BTreeMap<Price, PriorityQueue<Box<Order>, u64>>,
 }
-
 
 impl<'a> Orderbook {
     pub fn new() -> Orderbook {
@@ -24,6 +24,7 @@ impl<'a> Orderbook {
 
     pub fn new_order(&mut self, order: Order) {
         let quote = order.limit_price;
+        let order_id = order.order_id.clone();
 
         match order.side {
             Side::BUY => {
@@ -31,29 +32,32 @@ impl<'a> Orderbook {
 
                 match presence {
                     Some(quotes) => {
-                        quotes.push(Box::new(order));
-                    },
+                        println!("Again Buy for price: {}", order.limit_price.clone());
+                        quotes.push(Box::new(order), order_id);
+                    }
                     None => {
-                        let mut new_vec = Vec::new();
-                        new_vec.push(Box::new(order));
-                        self.bids.insert(quote, new_vec);
+                        println!("Buy for price: {}", order.limit_price.clone());
+                        let mut pr_queue = PriorityQueue::new();
+                        pr_queue.push(Box::new(order), order_id);
+                        self.bids.insert(quote, pr_queue);
                     }
                 }
-            },
+            }
             Side::SELL => {
                 let presence = self.asks.get_mut(&quote);
 
                 match presence {
                     Some(quotes) => {
-                        quotes.push(Box::new(order));
-                    },
+                        println!("Again Sell for price: {}", order.limit_price.clone());
+                        quotes.push(Box::new(order), order_id);
+                    }
                     None => {
-                        let mut new_vec = Vec::new();
-                        new_vec.push(Box::new(order));
-                        self.asks.insert(quote, new_vec);
+                        println!("Sell for price: {}", order.limit_price.clone());
+                        let mut pr_queue = PriorityQueue::new();
+                        pr_queue.push(Box::new(order), order_id);
+                        self.asks.insert(quote, pr_queue);
                     }
                 }
-
             }
         };
     }
@@ -62,10 +66,6 @@ impl<'a> Orderbook {
         let asks: usize = self.asks.len();
         let bids: usize = self.bids.len();
 
-        OrderbookSize{
-            asks,
-            bids
-        }
+        OrderbookSize { asks, bids }
     }
-
 }

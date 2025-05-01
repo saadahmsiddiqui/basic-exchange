@@ -118,6 +118,7 @@ dependencies = [
 name = "engine"
 version = "0.1.0"
 dependencies = [
+ "priority-queue",
  "serde",
  "serde_json",
  "serde_with",
@@ -265,6 +266,17 @@ name = "powerfmt"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
+
+[[package]]
+name = "priority-queue"
+version = "2.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef08705fa1589a1a59aa924ad77d14722cb0cd97b67dd5004ed5f4a4873fce8d"
+dependencies = [
+ "autocfg",
+ "equivalent",
+ "indexmap 2.9.0",
+]
 
 [[package]]
 name = "proc-macro2"

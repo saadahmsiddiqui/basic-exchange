@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 use serde::de::{Visitor, Deserialize};
 use serde::Serialize;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub enum OperationType {
     CREATE,
     DELETE

@@ -4,7 +4,7 @@ use serde::de::{Visitor, Deserialize};
 use serde::Serialize;
 
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
 pub struct Price(u64);
 
 impl<'de> Deserialize<'de> for Price {

@@ -3,7 +3,7 @@ use std::fmt::{self, Display};
 use serde::de::{Visitor, Deserialize};
 use serde::Serialize;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
 pub struct Amount(u64);
 
 impl<'de> Deserialize<'de> for Amount {

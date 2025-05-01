@@ -1,4 +1,6 @@
 
+use std::hash::Hash;
+
 use serde_with::{serde_as, DisplayFromStr};
 use serde::{Serialize, Deserialize};
 use crate::amount::Amount;
@@ -12,7 +14,7 @@ pub type Pair = String;
 
 
 #[serde_as]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Eq)]
 pub struct Order {
     pub type_op: OperationType,
     #[serde_as(as = "DisplayFromStr")]
@@ -23,4 +25,27 @@ pub struct Order {
     pub order_id: OrderId,
     pub limit_price: Price,
     pub side: Side
+}
+
+
+impl PartialEq for Order {
+    fn eq(&self, other: &Self) -> bool {
+        self.account_id == other.account_id && 
+        self.amount == other.amount &&
+        self.pair == other.pair &&
+        self.side == other.side &&
+        self.limit_price == other.limit_price &&
+        self.type_op == other.type_op
+    }
+}
+
+impl Hash for Order {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.account_id.hash(state);
+        self.amount.hash(state);
+        self.pair.hash(state);
+        self.side.hash(state);
+        self.limit_price.hash(state);
+        self.type_op.hash(state);
+    }
 }

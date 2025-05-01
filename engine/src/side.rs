@@ -3,11 +3,12 @@ use std::fmt::{self, Display};
 use serde::de::{Visitor, Deserialize};
 use serde::Serialize;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Hash, Eq, PartialOrd)]
 pub enum Side {
     BUY,
     SELL
 }
+
 
 impl Display for Side {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
