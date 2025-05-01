@@ -1,21 +1,33 @@
 use std::{fs::File, path::Path};
 
+use operation_type::OperationType;
+mod price;
+mod operation_type;
+mod side;
 mod order;
+mod orderbook;
 
 fn main() {
     let json_file_path = Path::new("./orders.json");
     let file = File::open(json_file_path).expect("Error: file could not be opened");
-
+    let mut ob = orderbook::Orderbook::new();
     let orders: Vec<order::Order> = serde_json::from_reader(file).expect("Error, json parsing issue");
-    // let orders: Vec<order::Order> = 
-    // let file = File::open(json_file_path)
+
+    println!("Total orders: {}", orders.len());
+    let mut total_delete = 0;
 
     orders.iter().for_each(
         |x| {
-            println!("{}", x.pair)
+            if x.type_op.eq(&OperationType::DELETE) {
+                total_delete += 1;
+            }
+
+            ob.new_order(x.clone());
         }
     );
 
-    let new_order = order::Order::new();
-    println!("Order details: {} {} {}", new_order.side, new_order.type_op, new_order.limit_price);
+    println!("Delete orders {}", total_delete);
+    let size = ob.orderbook_size();
+    println!("Orderbook asks: {} Orderbook bids: {}", size.asks, size.bids);
+
 }
