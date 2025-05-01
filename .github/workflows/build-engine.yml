@@ -1,5 +1,9 @@
 name: Build Engine
 
+defaults:
+  run:
+    working-directory: ./engine
+
 on:
   push:
   pull_request:
@@ -11,7 +15,6 @@ jobs:
   build_and_test:
     name: Rust project - latest
     runs-on: ubuntu-latest
-    working-directory: ./engine
     strategy:
       matrix:
         toolchain:
