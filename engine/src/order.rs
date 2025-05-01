@@ -1,4 +1,5 @@
 
+use std::cmp::Ordering;
 use std::hash::Hash;
 
 use serde_with::{serde_as, DisplayFromStr};
@@ -14,7 +15,7 @@ pub type Pair = String;
 
 
 #[serde_as]
-#[derive(Serialize, Deserialize, Clone, Eq)]
+#[derive(Serialize, Deserialize, Clone, Eq, PartialOrd)]
 pub struct Order {
     pub type_op: OperationType,
     #[serde_as(as = "DisplayFromStr")]
@@ -47,5 +48,17 @@ impl Hash for Order {
         self.side.hash(state);
         self.limit_price.hash(state);
         self.type_op.hash(state);
+    }
+}
+
+impl Ord for Order {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        if self.account_id > other.account_id {
+            Ordering::Greater
+        } else if self.account_id < other.account_id {
+            Ordering::Less
+        } else {
+            Ordering::Equal
+        }
     }
 }

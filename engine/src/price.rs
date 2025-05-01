@@ -5,7 +5,7 @@ use serde::Serialize;
 use crate::constants::PRECISION;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
-pub struct Price(u64);
+pub struct Price(pub u64);
 
 impl<'de> Deserialize<'de> for Price {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
