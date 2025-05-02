@@ -9,6 +9,7 @@ mod order;
 mod constants;
 mod orderbook;
 mod amount;
+mod trade;
 
 fn main() {
     let mut ob = orderbook::Orderbook::new();
@@ -20,33 +21,11 @@ fn main() {
 
     orders.iter().for_each(
         |x| {
-            let ask = ob.peek_ask();
-            let bid = ob.peek_bid();
-
             if x.type_op == OperationType::DELETE {
                 ob.remove_order(x);
             } else {
-                ob.new_order(x.clone());
+                ob.on_new_order(&mut x.clone());
             }
-
-            println!("{} {} {} {}", &x.type_op, &x.side, &x.amount, &x.limit_price);
-
-            match ask {
-                None => {},
-                Some(ask_tuple) => {
-                    println!("OB SELL Price: {} Amount: {}", ask_tuple.0.0, ask_tuple.1);
-                }
-            }
-
-            match bid {
-                None => {},
-                Some(bid_tuple) => {
-                    println!("OB BUY Price: {} Amount: {}", bid_tuple.0.0, bid_tuple.1);
-                }
-            }
-
-            ob.print_len();
-            println!();
         }
     );
 
