@@ -151,8 +151,9 @@ impl Orderbook {
         }
     }
 
-    pub fn remove_order(&mut self, order: &Order) {
+    pub fn remove_order(&mut self, order: &Order) -> bool {
         let is_bid = order.side == Side::BUY;
+        let mut removed = false;
 
         if is_bid {
             let reversed_price = Reverse(order.limit_price.clone());
@@ -163,6 +164,7 @@ impl Orderbook {
 
                 if let Some(index) = queue.iter().position(|x| x.order_id == order.order_id) {
                     queue.remove(index);
+                    removed = true;
                 }
 
                 if queue.len() == 0 {
@@ -178,6 +180,7 @@ impl Orderbook {
 
                 if let Some(index) = queue.iter().position(|x| x.order_id == order.order_id) {
                     queue.remove(index);
+                    removed = true;
                 }
 
                 if queue.len() == 0 {
@@ -187,6 +190,7 @@ impl Orderbook {
         }
 
         println!("Removed order {} price: {} amount: {}", order.order_id, order.limit_price, order.amount);
+        return removed;
     }
 
     pub fn save_json(&self) {
@@ -199,6 +203,10 @@ impl Orderbook {
         let mut orderbook_file = File::create(&orderbook_filename).unwrap();
         writeln!(orderbook_file, "{}", orderbook_json).unwrap();
         writeln!(trades_file, "{}", trades_json).unwrap();
+    }
+
+    pub fn get_trades_json(&self) -> String {
+        serde_json::to_string(&self.trades).unwrap()
     }
 }
 
