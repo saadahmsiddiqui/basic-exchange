@@ -1,4 +1,4 @@
-use std::{sync::Arc, thread::panicking};
+use std::sync::Arc;
 use axum::{Extension, Json};
 use crate::{engine::{operation_type::OperationType, order::Order}, server::state};
 

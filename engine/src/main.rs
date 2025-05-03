@@ -26,6 +26,6 @@ async fn main() {
         .unwrap();
 
 
-    println!("listening on {}", listener.local_addr().unwrap());
+    println!("Orderbook server on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
 }
