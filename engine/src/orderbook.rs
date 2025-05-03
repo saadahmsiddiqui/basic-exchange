@@ -19,7 +19,7 @@ pub struct Orderbook {
     trade_count: u64,
 }
 
-impl<'a> Orderbook {
+impl Orderbook {
     pub fn new() -> Orderbook {
         Orderbook {
             asks: BTreeMap::new(),
@@ -28,6 +28,26 @@ impl<'a> Orderbook {
             trade_count: 0,
         }
     }
+
+    fn add_trade(
+        &mut self,
+        price: &Price,
+        amount: &Amount,
+        buy_order_id: u64,
+        sell_order_id: u64,
+        buy_account_id: u64,
+        sell_account_id: u64
+    ) {
+        let trade_id_one = self.trade_count;
+        let trade_id_two = self.trade_count + 1;
+        self.trade_count += 2;
+        let buy_trade = Trade::new(price.clone(), amount.clone(), trade_id_one, buy_order_id, sell_order_id, buy_account_id, Side::BUY);
+        let sell_trade = Trade::new(price.clone(), amount.clone(), trade_id_two, buy_order_id, sell_order_id, sell_account_id, Side::SELL);
+
+        self.trades.push(buy_trade);
+        self.trades.push(sell_trade);
+    }
+
 
     fn on_new_buy(&mut self, order: &mut Order) {
         while let Some((price, mut asks_queue)) = self.asks.pop_first() {
@@ -39,16 +59,7 @@ impl<'a> Orderbook {
             while let Some(mut ask_order) = asks_queue.pop_front() {
                 let trade_amnt = order.amount.min(ask_order.amount);
 
-                let trade_id = self.trade_count;
-                self.trade_count += 1;
-                self.trades.push(Trade::new(
-                    ask_order.limit_price.clone(),
-                    trade_amnt.clone(),
-                    trade_id,
-                    order.order_id,
-                    ask_order.order_id,
-                ));
-
+                self.add_trade(&price, &trade_amnt, order.order_id, ask_order.order_id, order.order_id, ask_order.order_id);
                 println!(
                     "Matching order price: {} amount: {}",
                     ask_order.limit_price, trade_amnt
@@ -94,17 +105,7 @@ impl<'a> Orderbook {
 
             while let Some(mut bid_order) = bids_queue.pop_front() {
                 let trade_amnt = order.amount.min(bid_order.amount);
-
-                let trade_id = self.trade_count;
-                self.trade_count += 1;
-                self.trades.push(Trade::new(
-                    bid_order.limit_price.clone(),
-                    trade_amnt.clone(),
-                    trade_id,
-                    order.order_id,
-                    bid_order.order_id,
-                ));
-
+                self.add_trade(&price.0, &trade_amnt, bid_order.order_id, order.order_id, bid_order.order_id, order.order_id);
                 println!(
                     "Matching order price: {} amount: {}",
                     bid_order.limit_price, trade_amnt
@@ -184,6 +185,8 @@ impl<'a> Orderbook {
                 }
             }
         }
+
+        println!("Removed order {} price: {} amount: {}", order.order_id, order.limit_price, order.amount);
     }
 
     pub fn save_json(&self) {
