@@ -1,4 +1,4 @@
-name: Build Engine
+name: Build and test Engine
 
 defaults:
   run:
@@ -23,4 +23,5 @@ jobs:
       - uses: actions/checkout@v4
       - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
       - run: cargo build --verbose
+      - run: cargo test
   
