@@ -2,7 +2,7 @@ use crate::engine::amount::Amount;
 use crate::engine::order::Order;
 use crate::engine::price::Price;
 use crate::engine::side::Side;
-use crate::trade::Trade;
+use crate::engine::trade::Trade;
 use serde::Serialize;
 use serde::ser::SerializeStruct;
 use std::cmp::Reverse;

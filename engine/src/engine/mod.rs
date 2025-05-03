@@ -5,3 +5,4 @@ pub mod order;
 pub mod orderbook;
 pub mod price;
 pub mod side;
+pub mod trade;

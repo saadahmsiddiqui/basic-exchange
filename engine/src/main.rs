@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use axum::{routing::get, Extension, Router};
 use utils::{process_orders_from_file, read_orders_from_file, save_orderbook_state};
-mod trade;
 mod utils;
 mod server;
 mod engine;
