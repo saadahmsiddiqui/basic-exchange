@@ -4,10 +4,10 @@ use std::hash::Hash;
 
 use serde_with::{serde_as, DisplayFromStr};
 use serde::{Serialize, Deserialize};
-use crate::amount::Amount;
-use crate::operation_type::OperationType;
-use crate::price::Price;
-use crate::side::Side;
+use crate::engine::amount::Amount;
+use crate::engine::operation_type::OperationType;
+use crate::engine::price::Price;
+use crate::engine::side::Side;
 
 pub type OrderId = u64;
 pub type AccountId = u64;

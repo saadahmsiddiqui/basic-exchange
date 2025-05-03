@@ -1,22 +1,20 @@
 use std::fmt::{self, Display};
-use std::ops::{Add, Sub};
 
 use serde::de::{Visitor, Deserialize};
 use serde::Serialize;
-
-use crate::constants::PRECISION;
+use crate::engine::constants::PRECISION;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
-pub struct Amount(pub u64);
+pub struct Price(pub u64);
 
-impl<'de> Deserialize<'de> for Amount {
+impl<'de> Deserialize<'de> for Price {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
         where
             D: serde::Deserializer<'de> {
         
-        struct AmountVisitor;
-        impl<'de> Visitor<'de> for AmountVisitor {
-            type Value = Amount;
+        struct PriceVisitor;
+        impl<'de> Visitor<'de> for PriceVisitor {
+            type Value = Price;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str("a string representing a status")
@@ -29,47 +27,31 @@ impl<'de> Deserialize<'de> for Amount {
                 let val = v.parse::<f64>().unwrap();
                 let upscaled = (val * PRECISION as f64) as u64;
 
-                Ok(Amount(upscaled))
+                Ok(Price(upscaled))
             }
         }
 
-        deserializer.deserialize_str(AmountVisitor)
+        deserializer.deserialize_str(PriceVisitor)
 
 
     }
 }
 
-impl Serialize for Amount {
+
+impl Serialize for Price {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
             S: serde::Serializer {
         let val = self.0;
-        let original_amount = (val as f64) / (PRECISION as f64);
-        let in_str = original_amount.to_string();
+        let original_price = (val as f64) / (PRECISION as f64);
+        let in_str = original_price.to_string();
         serializer.serialize_str(&in_str)
     }
 }
 
-impl Display for Amount {
+impl Display for Price {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let in_str = self.0.to_string();
         f.write_str(&in_str)
-    }
-}
-
-impl Add for Amount {
-    type Output = Amount;
-    fn add(self, rhs: Self) -> Self::Output {
-        let amount = self.0 + rhs.0;
-        Self(amount)
-    }
-}
-
-impl Sub for Amount {
-    type Output = Amount;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        let amount = self.0 - rhs.0;
-        Self(amount)
     }
 }

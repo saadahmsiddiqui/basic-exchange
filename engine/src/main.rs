@@ -2,22 +2,16 @@ use std::sync::Arc;
 
 use axum::{routing::get, Extension, Router};
 use utils::{process_orders_from_file, read_orders_from_file, save_orderbook_state};
-mod amount;
-mod constants;
-mod operation_type;
-mod order;
-mod orderbook;
-mod price;
-mod side;
 mod trade;
 mod utils;
-mod routes;
+mod server;
+mod engine;
 mod state;
 
 
 #[tokio::main]
 async fn main() {
-    let mut ob = orderbook::Orderbook::new();
+    let mut ob = engine::orderbook::Orderbook::new();
     let file_orders = read_orders_from_file();
     process_orders_from_file(&mut ob, file_orders);
     save_orderbook_state(&ob);
@@ -27,7 +21,7 @@ async fn main() {
         orderbook: ob
     });
 
-    let app = Router::new().route("/", get(routes::get_orderbook)).layer(Extension(shared_state));
+    let app = Router::new().route("/", get(server::routes::get_orderbook)).layer(Extension(shared_state));
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
         .unwrap();
