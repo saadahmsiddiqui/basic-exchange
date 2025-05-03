@@ -5,5 +5,5 @@ This respository contains a basic order matching engine implmentation in RUST pr
 ## Setup
 
 1. Install `rust` and `Node.js`
-2. Open a terminal and `cd` into project engine directory and run `cd engine`, then `cargo run`
-3. Open another terminal and `cd` into project application directory and first run `yarn` and then `yarn dev`
+2. Open a terminal and `cd engine` into project engine then `cargo run`
+3. Open another terminal and `cd app` into project application directory and first run `yarn` and then `yarn dev`
