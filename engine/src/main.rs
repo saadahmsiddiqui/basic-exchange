@@ -1,4 +1,6 @@
-use axum::{Router, routing::get};
+use std::sync::Arc;
+
+use axum::{routing::get, Extension, Router};
 use utils::{process_orders_from_file, read_orders_from_file, save_orderbook_state};
 mod amount;
 mod constants;
@@ -9,10 +11,9 @@ mod price;
 mod side;
 mod trade;
 mod utils;
+mod routes;
+mod state;
 
-struct ServerState<'a> {
-    orderbook: &'a mut orderbook::Orderbook
-}
 
 #[tokio::main]
 async fn main() {
@@ -22,7 +23,11 @@ async fn main() {
     save_orderbook_state(&ob);
 
 
-    let app = Router::new().route("/", get(|| async { "Hello, world!" }));
+    let shared_state = Arc::new(state::ServerState {
+        orderbook: ob
+    });
+
+    let app = Router::new().route("/", get(routes::get_orderbook)).layer(Extension(shared_state));
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
         .unwrap();
