@@ -1,5 +1,5 @@
 use axum::{Router, routing::get};
-use utils::{process_orders_from_file, read_orders_from_file};
+use utils::{process_orders_from_file, read_orders_from_file, save_orderbook_state};
 mod amount;
 mod constants;
 mod operation_type;
@@ -19,14 +19,10 @@ async fn main() {
     let mut ob = orderbook::Orderbook::new();
     let file_orders = read_orders_from_file();
     process_orders_from_file(&mut ob, file_orders);
-
-
-
-
+    save_orderbook_state(&ob);
 
 
     let app = Router::new().route("/", get(|| async { "Hello, world!" }));
-
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
         .unwrap();
