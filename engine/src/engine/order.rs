@@ -64,10 +64,24 @@ impl Ord for Order {
 }
 
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn exploration() {
-        assert_eq!(2 + 2, 4);
+impl Order {
+    pub fn new (
+        type_op: OperationType,
+account_id: u64,
+amount: Amount,
+pair: String,
+order_id: u64,
+limit_price: Price,
+side: Side
+    ) -> Order {
+        Order{
+            type_op,
+            account_id,
+            amount,
+            pair,
+            order_id,
+            limit_price,
+            side
+        }
     }
 }

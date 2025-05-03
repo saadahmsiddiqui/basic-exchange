@@ -29,6 +29,14 @@ impl Orderbook {
         }
     }
 
+    pub fn get_asks_len(&self) -> usize {
+        self.asks.len()
+    }
+
+    pub fn get_bids_len(&self) -> usize {
+        self.bids.len()
+    }
+
     fn add_trade(
         &mut self,
         price: &Price,
@@ -36,18 +44,33 @@ impl Orderbook {
         buy_order_id: u64,
         sell_order_id: u64,
         buy_account_id: u64,
-        sell_account_id: u64
+        sell_account_id: u64,
     ) {
         let trade_id_one = self.trade_count;
         let trade_id_two = self.trade_count + 1;
         self.trade_count += 2;
-        let buy_trade = Trade::new(price.clone(), amount.clone(), trade_id_one, buy_order_id, sell_order_id, buy_account_id, Side::BUY);
-        let sell_trade = Trade::new(price.clone(), amount.clone(), trade_id_two, buy_order_id, sell_order_id, sell_account_id, Side::SELL);
+        let buy_trade = Trade::new(
+            price.clone(),
+            amount.clone(),
+            trade_id_one,
+            buy_order_id,
+            sell_order_id,
+            buy_account_id,
+            Side::BUY,
+        );
+        let sell_trade = Trade::new(
+            price.clone(),
+            amount.clone(),
+            trade_id_two,
+            buy_order_id,
+            sell_order_id,
+            sell_account_id,
+            Side::SELL,
+        );
 
         self.trades.push(buy_trade);
         self.trades.push(sell_trade);
     }
-
 
     fn on_new_buy(&mut self, order: &mut Order) {
         while let Some((price, mut asks_queue)) = self.asks.pop_first() {
@@ -59,7 +82,14 @@ impl Orderbook {
             while let Some(mut ask_order) = asks_queue.pop_front() {
                 let trade_amnt = order.amount.min(ask_order.amount);
 
-                self.add_trade(&price, &trade_amnt, order.order_id, ask_order.order_id, order.order_id, ask_order.order_id);
+                self.add_trade(
+                    &price,
+                    &trade_amnt,
+                    order.order_id,
+                    ask_order.order_id,
+                    order.order_id,
+                    ask_order.order_id,
+                );
                 println!(
                     "Matching order price: {} amount: {}",
                     ask_order.limit_price, trade_amnt
@@ -105,7 +135,14 @@ impl Orderbook {
 
             while let Some(mut bid_order) = bids_queue.pop_front() {
                 let trade_amnt = order.amount.min(bid_order.amount);
-                self.add_trade(&price.0, &trade_amnt, bid_order.order_id, order.order_id, bid_order.order_id, order.order_id);
+                self.add_trade(
+                    &price.0,
+                    &trade_amnt,
+                    bid_order.order_id,
+                    order.order_id,
+                    bid_order.order_id,
+                    order.order_id,
+                );
                 println!(
                     "Matching order price: {} amount: {}",
                     bid_order.limit_price, trade_amnt
@@ -140,7 +177,6 @@ impl Orderbook {
                 .or_default()
                 .push_back(order.clone());
         }
-
     }
 
     pub fn on_new_order(&mut self, order: &mut Order) {
@@ -189,7 +225,10 @@ impl Orderbook {
             }
         }
 
-        println!("Removed order {} price: {} amount: {}", order.order_id, order.limit_price, order.amount);
+        println!(
+            "Removed order {} price: {} amount: {}",
+            order.order_id, order.limit_price, order.amount
+        );
         return removed;
     }
 
@@ -237,5 +276,45 @@ impl Serialize for Orderbook {
         state.serialize_field("asks", &ask_list).unwrap();
         state.serialize_field("bids", &bid_list).unwrap();
         state.end()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::engine::{
+        amount::Amount, operation_type::OperationType, order::Order, orderbook::Orderbook, price::Price, side::Side
+    };
+
+    #[test]
+    fn exploration() {
+        let mut sell_order = Order::new(
+            OperationType::CREATE,
+            0,
+            Amount(1),
+            String::from("BTC/USDT"),
+            0,
+            Price(1),
+            Side::SELL,
+        );
+
+        let mut buy_order = Order::new(
+            OperationType::CREATE,
+            0,
+            Amount(1),
+            String::from("BTC/USDT"),
+            0,
+            Price(1),
+            Side::BUY,
+        );
+
+
+        let mut ob = Orderbook::new();
+
+        ob.on_new_order(&mut sell_order);
+        ob.on_new_order(&mut buy_order);
+
+
+        assert_eq!(ob.get_asks_len(), 0);
+        assert_eq!(ob.get_bids_len(), 0);
     }
 }
